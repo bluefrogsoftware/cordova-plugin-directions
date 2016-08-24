@@ -10,12 +10,29 @@
     NSString* currentLoc = @"current%20location";
 
     NSString* url;
+
+    BOOL canHandle = [[UIApplication sharedApplication] canOpenURL: [NSURL URLWithString:@"comgooglemaps:"]];
+
     if (address != nil) {
         address = [address stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
-        url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@", currentLoc, address];
-    } else {
-        url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
     }
+
+    if (canHandle) {
+        // Google maps installed
+        if (address != nil) {
+            url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@", currentLoc, address];
+        } else {
+            url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
+        }
+    } else {
+        // Use Apple maps
+        if (address != nil) {
+            url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@", currentLoc, address];
+        } else {
+            url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
+        }
+    }
+
     [[UIApplication sharedApplication] openURL: [NSURL URLWithString: url]];
 
     CDVPluginResult* result = [CDVPluginResult
