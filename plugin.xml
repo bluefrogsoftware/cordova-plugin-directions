@@ -19,6 +19,11 @@
         </config-file>
         <header-file src="src/ios/Directions.h" />
         <source-file src="src/ios/Directions.m" />
+        <config-file target="*-Info.plist" parent="LSApplicationQueriesSchemes">
+            <array>
+                <string>comgooglemaps</string>
+            </array>
+        </config-file>
     </platform>
     <platform name="android">
         <config-file target="res/xml/config.xml" parent="/*">
