@@ -4,9 +4,11 @@
 
 - (void)navigateTo:(CDVInvokedUrlCommand*)command
 {
+
     NSString* address = [[[command arguments] objectAtIndex:0] valueForKey:@"address"];
     NSString* lat = [[[command arguments] objectAtIndex:0] valueForKey:@"latitude"];
     NSString* lng = [[[command arguments] objectAtIndex:0] valueForKey:@"longitude"];
+    NSNumber* showSource = [[[command arguments] objectAtIndex:0] valueForKey:@"showSource"];
     NSString* currentLoc = @"current%20location";
 
     NSString* url;
@@ -20,16 +22,36 @@
     if (canHandle) {
         // Google maps installed
         if (address != nil) {
-            url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@", currentLoc, address];
+            if ([showSource isEqual: @(YES)]) {
+                url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@", currentLoc, address];
+            }
+            else {
+                url = [NSString stringWithFormat:@"comgooglemaps://?q=%@", address];
+            }
         } else {
-            url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
+            if ([showSource isEqual: @(YES)]) {
+                url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
+            }
+            else {
+                url = [NSString stringWithFormat:@"comgooglemaps://?q=%@,%@", lat, lng];
+            }
         }
     } else {
         // Use Apple maps
         if (address != nil) {
-            url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@", currentLoc, address];
+            if (showSource) {
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@", currentLoc, address];
+            }
+            else {
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?q=%@", address];
+            }
         } else {
-            url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
+            if (showSource) {
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@,%@", currentLoc, lat, lng];
+            }
+            else {
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?q=%@,%@", lat, lng];
+            }
         }
     }
 
