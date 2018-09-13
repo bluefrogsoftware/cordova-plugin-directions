@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.net.URLEncoder;
 
 import android.annotation.SuppressLint;
 
@@ -31,11 +32,16 @@ public class Directions extends CordovaPlugin {
 	public boolean execute(String action, JSONArray args, CallbackContext callbackContext) throws JSONException {
 		JSONObject json = args.getJSONObject(0);
     Boolean showSource = Boolean.valueOf(getJSONProperty(json, "showSource"));
+    String directionsMode = "";
+
+		if(json.has("directionsMode")) {
+      directionsMode = getJSONProperty(json, "directionsMode");
+    }
 
 		if(json.has("address")) {
     			String address = getJSONProperty(json, "address");
     			try {
-			doSendIntent(address, showSource);
+			doSendIntent(address, showSource, directionsMode);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -44,7 +50,7 @@ public class Directions extends CordovaPlugin {
 			String latitude = getJSONProperty(json, "latitude");
 			String longitude = getJSONProperty(json, "longitude");
 			try {
-				doSendIntent(latitude, longitude, showSource);
+				doSendIntent(latitude, longitude, showSource, directionsMode);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -60,11 +66,18 @@ public class Directions extends CordovaPlugin {
 		return null;
 	}
 
-	private void doSendIntent(String latitude, String longitude, Boolean showSource) throws IOException {
+	private void doSendIntent(String latitude, String longitude, Boolean showSource, String directionsMode) throws IOException {
     String uri;
 
+	//See: https://developers.google.com/maps/documentation/urls/android-intents
+
+	if (directionsMode.equals("driving")) { directionsMode = "d"; }
+	if (directionsMode.equals("walking")) { directionsMode = "w"; }
+	if (directionsMode.equals("transit")) { directionsMode = "r"; }
+	if (directionsMode.equals("bicycling")) { directionsMode = "b"; }
+
     if (showSource) {
-      uri = "http://maps.google.com/maps?f=d&daddr=" + latitude + "," + longitude;
+      uri = "http://maps.google.com/maps?f=d&daddr=" + latitude + "," + longitude + "&dirflg=" + directionsMode;
     }
     else {
       uri = "http://maps.google.com/maps?q=" + latitude + "," + longitude;
@@ -76,14 +89,21 @@ public class Directions extends CordovaPlugin {
 		cordova.startActivityForResult(this, intent, 0);
 	}
 
-	private void doSendIntent(String address, Boolean showSource) throws IOException {
+	private void doSendIntent(String address, Boolean showSource, String directionsMode) throws IOException {
     String uri;
 
+	//See: https://developers.google.com/maps/documentation/urls/android-intents
+
+	if (directionsMode.equals("driving")) { directionsMode = "d"; }
+	if (directionsMode.equals("walking")) { directionsMode = "w"; }
+	if (directionsMode.equals("transit")) { directionsMode = "r"; }
+	if (directionsMode.equals("bicycling")) { directionsMode = "b"; }
+
     if (showSource) {
-      uri = "http://maps.google.com/maps?f=d&daddr=" + address;
+      uri = "http://maps.google.com/maps?f=d&daddr=" + URLEncoder.encode(address, "UTF-8") + "&dirflg=" + directionsMode;
     }
     else {
-      uri = "http://maps.google.com/maps?q=" + address;
+      uri = "http://maps.google.com/maps?q=" + URLEncoder.encode(address, "UTF-8");
     }
 
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
