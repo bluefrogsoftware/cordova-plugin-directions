@@ -5,7 +5,8 @@
 - (void)navigateTo:(CDVInvokedUrlCommand*)command
 {
 
-    NSString* address = [[[command arguments] objectAtIndex:0] valueForKey:@"address"];
+    NSString* destinationAddress = [[[command arguments] objectAtIndex:0] valueForKey:@"destinationAddress"];
+    NSString* originAddress = [[[command arguments] objectAtIndex:0] valueForKey:@"originAddress"];
     NSString* lat = [[[command arguments] objectAtIndex:0] valueForKey:@"latitude"];
     NSString* lng = [[[command arguments] objectAtIndex:0] valueForKey:@"longitude"];
     NSNumber* showSource = [[[command arguments] objectAtIndex:0] valueForKey:@"showSource"];
@@ -23,22 +24,29 @@
 
     BOOL canHandle = [[UIApplication sharedApplication] canOpenURL: [NSURL URLWithString:@"comgooglemaps:"]];
 
-    if (address != nil) {
-        address = [address stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+    if (destinationAddress != nil) {
+        destinationAddress = [destinationAddress stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+    }
+    
+    if (originAddress != nil) {
+        originAddress = [originAddress stringByAddingPercentEncodingWithAllowedCharacters:[NSCharacterSet URLHostAllowedCharacterSet]];
+    }
+    else {
+        originAddress = @"";
     }
 
     if (canHandle) {
         // Google maps installed
-        if (address != nil) {
+        if (destinationAddress != nil) {
             if ([showSource isEqual: @(YES)]) {
-                url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@&directionsmode=%@", currentLoc, address, directionsMode];
+                url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@&directionsmode=%@", originAddress, destinationAddress, directionsMode];
             }
             else {
-                url = [NSString stringWithFormat:@"comgooglemaps://?q=%@", address];
+                url = [NSString stringWithFormat:@"comgooglemaps://?q=%@", destinationAddress];
             }
         } else {
             if ([showSource isEqual: @(YES)]) {
-                url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@,%@&directionsmode=%@", currentLoc, lat, lng, directionsMode];
+                url = [NSString stringWithFormat:@"comgooglemaps://?saddr=%@&daddr=%@,%@&directionsmode=%@", originAddress, lat, lng, directionsMode];
             }
             else {
                 url = [NSString stringWithFormat:@"comgooglemaps://?q=%@,%@", lat, lng];
@@ -47,16 +55,16 @@
     } else {
         currentLoc = @"current%20location";
         // Use Apple maps
-        if (address != nil) {
+        if (destinationAddress != nil) {
             if ([showSource isEqual: @(YES)]) {
-                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@&dirflg=%@", currentLoc, address, transportType];
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@&dirflg=%@", originAddress, destinationAddress, transportType];
             }
             else {
-                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?q=%@", address];
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?q=%@", destinationAddress];
             }
         } else {
             if ([showSource isEqual: @(YES)]) {
-                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@,%@&dirflg=%@", currentLoc, lat, lng, transportType];
+                url = [NSString stringWithFormat:@"http://maps.apple.com/maps?saddr=%@&daddr=%@,%@&dirflg=%@", originAddress, lat, lng, transportType];
             }
             else {
                 url = [NSString stringWithFormat:@"http://maps.apple.com/maps?q=%@,%@", lat, lng];

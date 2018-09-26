@@ -38,10 +38,11 @@ public class Directions extends CordovaPlugin {
       directionsMode = getJSONProperty(json, "directionsMode");
     }
 
-		if(json.has("address")) {
-    			String address = getJSONProperty(json, "address");
+		if(json.has("destinationAddress")) {
+    			String destinationAddress = getJSONProperty(json, "destinationAddress");
+    			String originAddress = getJSONProperty(json, "originAddress");
     			try {
-			doSendIntent(address, showSource, directionsMode);
+			doSendIntentForAddress(destinationAddress, originAddress, showSource, directionsMode);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -89,8 +90,12 @@ public class Directions extends CordovaPlugin {
 		cordova.startActivityForResult(this, intent, 0);
 	}
 
-	private void doSendIntent(String address, Boolean showSource, String directionsMode) throws IOException {
+	private void doSendIntentForAddress(String destinationAddress, String originAddress, Boolean showSource, String directionsMode) throws IOException {
     String uri;
+
+    if (originAddress == null) {
+      originAddress = "";
+    }
 
 	//See: https://developers.google.com/maps/documentation/urls/android-intents
 
@@ -100,10 +105,10 @@ public class Directions extends CordovaPlugin {
 	if (directionsMode.equals("bicycling")) { directionsMode = "b"; }
 
     if (showSource) {
-      uri = "http://maps.google.com/maps?f=d&daddr=" + URLEncoder.encode(address, "UTF-8") + "&dirflg=" + directionsMode;
+      uri = "http://maps.google.com/maps?f=d&saddr=" + URLEncoder.encode(originAddress, "UTF-8") + "&daddr=" + URLEncoder.encode(destinationAddress, "UTF-8") + "&dirflg=" + directionsMode;
     }
     else {
-      uri = "http://maps.google.com/maps?q=" + URLEncoder.encode(address, "UTF-8");
+      uri = "http://maps.google.com/maps?q=" + URLEncoder.encode(destinationAddress, "UTF-8");
     }
 
 		final Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
